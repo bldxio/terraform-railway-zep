@@ -23,11 +23,13 @@ module "railway_project" {
 # Railway Services within the project
 
 resource "railway_service" "pgvector" {
-  depends_on   = [module.railway_project]
-  project_id   = module.railway_project.id
-  name         = "postgres"
-  source_image = "ankane/pgvector:v0.5.1"
-  volume       = { name = "postgres-data", mount_path = "/var/lib/postgresql/data" }
+  depends_on         = [module.railway_project]
+  project_id         = module.railway_project.id
+  name               = "postgres"
+  source_repo        = "bldxio/pgvector"
+  source_repo_branch = "master"
+  config_path        = "railway-pgvector.toml"
+  volume             = { name = "postgres-data", mount_path = "/var/lib/postgresql/data" }
 }
 
 resource "null_resource" "pgvector_delay" {
@@ -35,6 +37,12 @@ resource "null_resource" "pgvector_delay" {
   provisioner "local-exec" {
     command = "sleep 30" # Wait 30 seconds
   }
+}
+
+resource "railway_tcp_proxy" "pgvector" {
+  application_port = 5432
+  environment_id   = railway_project.environment.default_environment.id
+  service_id       = railway_service.pgvector.id
 }
 
 resource "railway_service" "graphiti" {
