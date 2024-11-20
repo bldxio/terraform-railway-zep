@@ -41,7 +41,7 @@ resource "null_resource" "pgvector_delay" {
 
 resource "railway_tcp_proxy" "pgvector" {
   application_port = 5432
-  environment_id   = railway_project.environment.default_environment.id
+  environment_id   = module.railway_project.environment_id
   service_id       = railway_service.pgvector.id
 }
 
