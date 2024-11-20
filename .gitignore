@@ -28,3 +28,4 @@ test_data
 # Go workspace file
 .idea
 .vscode
+.aider*

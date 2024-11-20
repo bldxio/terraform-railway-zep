@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+startCommand = '/bin/sh -c "unset PGPORT; docker-entrypoint.sh postgres --port=5432"'
+healthcheckPath = "/healthz"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 8
