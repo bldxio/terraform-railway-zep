@@ -16,25 +16,19 @@ variable "openai_api_key" {
   type        = string
 }
 
-variable "platform" {
-  description = "The cloud platform for the project"
-  type        = string
-  default     = "railway"
-}
-
 variable "model" {
   description = "The model name to be used in graphiti"
   type        = string
   default     = "gpt-4o"
 }
 
-variable "neo4j_user" {
-  description = "Neo4j user"
-  type        = string
-  default     = "neo4j"
-}
-
 variable "team_id" {
   description = "The team ID for the project"
   type        = string
+}
+
+variable "resource_identifiers" {
+  description = "The resource identifier for the project"
+  type        = list(string)
+  default     = ["pgvector", "zep", "neo4j"]
 }

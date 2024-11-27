@@ -25,10 +25,10 @@ module "railway_project" {
 resource "railway_service" "pgvector" {
   depends_on         = [module.railway_project]
   project_id         = module.railway_project.id
-  name               = "postgres"
+  name               = "pgvector"
   source_repo        = "bldxio/pgvector"
   source_repo_branch = "master"
-  config_path        = "railway-pgvector.toml"
+  config_path        = "railway.toml"
   volume             = { name = "postgres-data", mount_path = "/var/lib/postgresql/data" }
 }
 
@@ -46,7 +46,7 @@ resource "railway_tcp_proxy" "pgvector" {
 }
 
 resource "railway_service" "graphiti" {
-  depends_on   = [railway_service.pgvector, null_resource.pgvector_delay]
+  depends_on   = [railway_service.neo4j, null_resource.neo4j_delay]
   project_id   = module.railway_project.id
   name         = "graphiti"
   source_image = "zepai/graphiti:0.3"
@@ -61,7 +61,7 @@ resource "null_resource" "graphiti_delay" {
 }
 
 resource "railway_service" "neo4j" {
-  depends_on   = [railway_service.graphiti, null_resource.graphiti_delay]
+  depends_on   = [railway_service.pgvector, null_resource.pgvector_delay]
   project_id   = module.railway_project.id
   name         = "neo4j"
   source_image = "neo4j:5.22.0"
@@ -78,9 +78,8 @@ resource "null_resource" "neo4j_delay" {
 resource "railway_service" "zep" {
   depends_on         = [railway_service.neo4j, null_resource.neo4j_delay]
   project_id         = module.railway_project.id
-  name               = var.name
+  name               = "zep"
   source_repo        = "bldxio/zep"
   source_repo_branch = "main"
   config_path        = "railway.toml"
-  volume             = { name = "zep-data", mount_path = "/app/" }
 }

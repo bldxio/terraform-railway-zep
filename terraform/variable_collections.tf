@@ -1,8 +1,11 @@
 # Railway Environment Variables per service
 
 # password module
-module "password" {
-  source = "git::https://github.com/bldxio/terraform-random-password"
+module "passwords" {
+  source              = "git::https://github.com/bldxio/terraform-random-password"
+  for_each            = toset(var.resource_identifiers)
+  length              = 32
+  resource_identifier = each.key
 }
 
 # zep
@@ -12,32 +15,36 @@ resource "railway_variable_collection" "zep" {
 
   variables = [
     {
-      name  = "ZEP_CONFIG_FILE"
-      value = "zep.yaml"
+      name  = "API_SECRET"
+      value = var.openai_api_key
     },
     {
-      name  = "POSTGRES_USER"
-      value = var.platform
+      name  = "GRAPHITI_URL"
+      value = "$${{graphiti.GRAPHITI_HOST_PRIVATE}}"
     },
     {
-      name  = "POSTGRES_PASSWORD"
-      value = module.password.result
+      name  = "PGHOST"
+      value = "$${{pgvector.PGHOST}}"
+    },
+    {
+      name  = "PGPORT"
+      value = "$${{pgvector.PGPORT}}"
+    },
+    {
+      name  = "PORT"
+      value = "8000"
     },
     {
       name  = "POSTGRES_DB"
-      value = var.platform
+      value = "$${{pgvector.POSTGRES_DB}}"
     },
     {
-      name  = "PGHOST_PRIVATE"
-      value = "$${{postgres.PGHOST_PRIVATE}}"
+      name  = "POSTGRES_PASSWORD"
+      value = "$${{pgvector.POSTGRES_PASSWORD}}"
     },
     {
-      name  = "PGPORT_PRIVATE"
-      value = "5432"
-    },
-    {
-      name  = "GRAPHITI_HOST_PRIVATE"
-      value = "$${{graphiti.GRAPHITI_HOST_PRIVATE}}"
+      name  = "POSTGRES_USER"
+      value = "$${{pgvector.POSTGRES_USER}}"
     }
   ]
 }
@@ -49,10 +56,6 @@ resource "railway_variable_collection" "graphiti" {
 
   variables = [
     {
-      name  = "OPENAI_API_KEY"
-      value = var.openai_api_key
-    },
-    {
       name  = "GRAPHITI_HOST_PRIVATE"
       value = "$${{RAILWAY_PRIVATE_DOMAIN}}"
     },
@@ -61,16 +64,20 @@ resource "railway_variable_collection" "graphiti" {
       value = var.model
     },
     {
+      name  = "NEO4J_PASSWORD"
+      value = "$${{neo4j.NEO4J_PASSWORD}}"
+    },
+    {
       name  = "NEO4J_URI"
       value = "bolt://$${{neo4j.NEO4J_HOST_PRIVATE}}:$${{neo4j.NEO4J_PORT_PRIVATE}}"
     },
     {
       name  = "NEO4J_USER"
-      value = var.neo4j_user
+      value = "neo4j"
     },
     {
-      name  = "NEO4J_PASSWORD"
-      value = "$${{neo4j.NEO4J_PASSWORD}}"
+      name  = "OPENAI_API_KEY"
+      value = var.openai_api_key
     },
     {
       name  = "PORT"
@@ -86,49 +93,53 @@ resource "railway_variable_collection" "pgvector" {
 
   variables = [
     {
-      name  = "DATABASE_PRIVATE_URL"
-      value = "postgres://$${{POSTGRES_USER}}:$${{POSTGRES_PASSWORD}}@$${{PGHOST_PRIVATE}}:$${{PGPORT_PRIVATE}}/$${{POSTGRES_DB}}"
+      name  = "DATABASE_URL"
+      value = "postgres://$${{PGUSER}}:$${{PGPASSWORD}}@$${{PGHOST}}:$${{PGPORT}}/$${{PGDATABASE}}"
     },
     {
-      name  = "DATABASE_URL"
-      value = "postgres://$${{POSTGRES_USER}}:$${{POSTGRES_PASSWORD}}@$${{PGHOST}}:$${{PGPORT}}/$${{POSTGRES_DB}}"
+      name  = "DATABASE_URL_PRIVATE"
+      value = "postgres://$${{PGUSER}}:$${{PGPASSWORD}}@$${{PGHOST_PRIVATE}}:$${{PGPORT_PRIVATE}}/$${{PGDATABASE}}"
     },
     {
       name  = "PGDATA"
       value = "/var/lib/postgresql/data/pgdata"
     },
     {
+      name  = "PGDATABASE"
+      value = "$${{POSTGRES_DB}}"
+    },
+    {
       name  = "PGHOST"
       value = "$${{RAILWAY_TCP_PROXY_DOMAIN}}"
     },
     {
-      name  = "PGHOST_PRIVATE"
-      value = "$${{RAILWAY_PRIVATE_DOMAIN}}"
+      name  = "PGPASSWORD"
+      value = "$${{POSTGRES_PASSWORD}}"
     },
     {
       name  = "PGPORT"
-      value = "5432"
+      value = "$${{RAILWAY_TCP_PROXY_PORT}}"
     },
     {
       name  = "PGPORT_PRIVATE"
       value = "5432"
     },
     {
+      name  = "PGUSER"
+      value = "$${{POSTGRES_USER}}"
+    },
+    {
       name  = "POSTGRES_DB"
-      value = var.platform
+      value = "railway"
     },
     {
       name  = "POSTGRES_PASSWORD"
-      value = module.password.result
+      value = module.passwords["pgvector"].result
     },
     {
       name  = "POSTGRES_USER"
-      value = var.platform
+      value = "postgres"
     },
-    {
-      name  = "SSL_CERT_DAYS"
-      value = "820"
-    }
   ]
 }
 
@@ -139,15 +150,15 @@ resource "railway_variable_collection" "neo4j" {
   variables = [
     {
       name  = "NEO4J_AUTH"
-      value = "neo4j/${module.password.result}"
-    },
-    {
-      name  = "NEO4J_PASSWORD"
-      value = "${module.password.result}"
+      value = "neo4j/${module.passwords["neo4j"].result}"
     },
     {
       name  = "NEO4J_HOST_PRIVATE"
       value = "$${{RAILWAY_PRIVATE_DOMAIN}}"
+    },
+    {
+      name  = "NEO4J_PASSWORD"
+      value = "${module.passwords["neo4j"].result}"
     },
     {
       name  = "NEO4J_PORT_PRIVATE"
