@@ -14,7 +14,8 @@ terraform {
 
 # Railway Project
 module "railway_project" {
-  source      = "git::https://github.com/bldxio/terraform-railway-railway-project"
+  source      = "app.terraform.io/BLDX/project/railway"
+  version     = "0.0.1"
   name        = var.name
   environment = var.environment
   team_id     = var.team_id

@@ -2,7 +2,8 @@
 
 # password module
 module "passwords" {
-  source              = "git::https://github.com/bldxio/terraform-random-password"
+  source              = "app.terraform.io/BLDX/1password/random"
+  version             = "0.0.1"
   for_each            = toset(var.resource_identifiers)
   length              = 32
   resource_identifier = each.key
