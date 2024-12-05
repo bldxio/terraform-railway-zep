@@ -19,7 +19,7 @@ variable "openai_api_key" {
 variable "model" {
   description = "The model name to be used in graphiti"
   type        = string
-  default     = "gpt-4o"
+  default     = "gpt-4o-mini"
 }
 
 variable "team_id" {
