@@ -1,6 +1,6 @@
 # Terraform Module for Zep Memory Application
 
-This Terraform module sets up the infrastructure for the Zep Memory Application using Railway services. It provisions services like `pgvector`, `graphiti`, `neo4j`, and `zep` with necessary configurations and environment variables.
+This Terraform module sets up the infrastructure for the Zep Memory Application using Railway services. It provisions services like `pgvector`, `graphiti`, `neo4j`, and `zep` with necessary configurations and environment variables. More information can be seen at [terraform-railway-zep](https://app.terraform.io/app/BLDX/registry/modules/private/BLDX/zep/railway/0.0.2). To see an example of an upstream application using this module refer to <https://github.com/bldxio/infra-prod/tree/main/apps/zep>
 
 ## Usage
 
@@ -25,8 +25,8 @@ module "zep_memory" {
 - **environment**: (string) The environment name for the project. Default is "prd".
 - **openai_api_key**: (string) OpenAI API key.
 - **model**: (string) The model name to be used in graphiti. Default is "gpt-4o".
-- **team_id**: (string) The team ID for the project.
-- **resource_identifiers**: (list(string)) The resource identifiers for the project. Default is ["pgvector", "zep", "neo4j"].
+- **team_id**: (string) Your team's ID in railway.
+- **resource_identifiers**: (list(string)) The resource identifiers for the project. Default is ["pgvector", "zep", "neo4j"]. This needs to be the names of the services you will be using the random password module in if using it.
 
 ## Outputs
 
@@ -42,6 +42,7 @@ module "zep_memory" {
 - **railway_service**: Manages Railway services for `pgvector`, `graphiti`, `neo4j`, and `zep`.
 - **railway_tcp_proxy**: Sets up TCP proxy for `pgvector`.
 - **null_resource**: Used for delays between service provisioning.
+  > **Note** this is only necessary due to railways rate limits on volume cratiion, and service creation.
 
 ## Modules
 
